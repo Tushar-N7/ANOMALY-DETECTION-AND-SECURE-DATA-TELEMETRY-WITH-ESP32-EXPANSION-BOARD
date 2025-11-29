@@ -1,1 +1,209 @@
+#include <Arduino.h>
+#include <WiFi.h>
+#include <ArduinoOTA.h>
+#include <Preferences.h>
 
+// -------------------- Pins --------------------
+#define BUTTON_PIN 13
+#define LED_PIN 2
+
+// -------------------- Modes --------------------
+#define NUM_MODES 7
+uint8_t currentMode = 0;
+
+// -------------------- Button Timing --------------------
+const unsigned long LONG_PRESS_MS = 800;
+const unsigned long DEBOUNCE_MS = 50;
+
+// -------------------- Variables --------------------
+unsigned long lastSensorMillis = 0;
+unsigned long sampleInterval = 1000;
+
+Preferences prefs;
+
+// ------------ Forward declarations ------------
+void applyMode(uint8_t m);
+void saveMode(uint8_t m);
+uint8_t nextMode(uint8_t m);
+uint8_t prevMode(uint8_t m);
+void readAndPrintDummySensors(bool t, bool h, bool a);
+void startWiFiIfNeeded();
+void stopWiFiIfOn();
+void enterOTAModeOnce();
+
+// =====================================================
+//                      SETUP
+// =====================================================
+void setup() {
+  Serial.begin(115200);
+  delay(100);
+
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  pinMode(LED_PIN, OUTPUT);
+
+  prefs.begin("modecfg", false);
+  currentMode = prefs.getUChar("last_mode", 0);
+  if (currentMode >= NUM_MODES) currentMode = 0;
+
+  Serial.println("Booting ESP32...");
+  Serial.print("Restored Mode: "); Serial.println(currentMode);
+
+  applyMode(currentMode);
+}
+
+// =====================================================
+//              Button handler (FIXED)
+// =====================================================
+void handleButton() {
+  static bool buttonWasPressed = false;
+  static unsigned long pressStart = 0;
+
+  bool pressed = (digitalRead(BUTTON_PIN) == LOW);  // Active LOW
+  unsigned long now = millis();
+
+  // --- BUTTON PRESSED ---
+  if (pressed && !buttonWasPressed) {
+    pressStart = now;
+    buttonWasPressed = true;
+  }
+
+  // --- BUTTON RELEASED ---
+  if (!pressed && buttonWasPressed) {
+    unsigned long duration = now - pressStart;
+
+    if (duration >= LONG_PRESS_MS) {
+      // LONG PRESS → previous mode
+      currentMode = prevMode(currentMode);
+      Serial.print("LONG press → Mode ");
+      Serial.println(currentMode);
+    }
+    else if (duration > DEBOUNCE_MS) {
+      // SHORT PRESS → next mode
+      currentMode = nextMode(currentMode);
+      Serial.print("SHORT press → Mode ");
+      Serial.println(currentMode);
+    }
+
+    applyMode(currentMode);
+    saveMode(currentMode);
+
+    buttonWasPressed = false;
+  }
+}
+
+// =====================================================
+//                         LOOP
+// =====================================================
+void loop() {
+  handleButton();
+
+  unsigned long now = millis();
+  if (now - lastSensorMillis >= sampleInterval) {
+    lastSensorMillis = now;
+
+    switch (currentMode) {
+      case 0:
+        Serial.println("[NORMAL]"); 
+        readAndPrintDummySensors(true,true,true);
+        break;
+      case 1:
+        Serial.println("[FULL PERFORMANCE]");
+        readAndPrintDummySensors(true,true,true);
+        break;
+      case 2:
+        Serial.println("[LOW POWER]");
+        readAndPrintDummySensors(true,false,false);
+        break;
+      case 3:
+        Serial.println("[MAINTENANCE]");
+        Serial.printf("Heap: %u  CPU: %u MHz\n", ESP.getFreeHeap(), ESP.getCpuFreqMHz());
+        break;
+      case 4:
+        Serial.println("[TEST MODE]");
+        readAndPrintDummySensors(true,true,true);
+        break;
+      case 5:
+        Serial.println("[SAFE MODE]");
+        readAndPrintDummySensors(false,true,false);
+        break;
+      case 6:
+        Serial.println("[OTA MODE] waiting...");
+        ArduinoOTA.handle();
+        break;
+    }
+  }
+
+  delay(5);
+}
+
+// =====================================================
+//                    Mode Logic
+// =====================================================
+void applyMode(uint8_t mode) {
+  switch (mode) {
+    case 0: setCpuFrequencyMhz(160); startWiFiIfNeeded(); sampleInterval=1000; digitalWrite(LED_PIN,1); break;
+    case 1: setCpuFrequencyMhz(240); startWiFiIfNeeded(); sampleInterval=300;  digitalWrite(LED_PIN,1); break;
+    case 2: setCpuFrequencyMhz(80);  stopWiFiIfOn();      sampleInterval=2000; digitalWrite(LED_PIN,0); break;
+    case 3: setCpuFrequencyMhz(160); startWiFiIfNeeded(); sampleInterval=1500; digitalWrite(LED_PIN,1); break;
+    case 4: setCpuFrequencyMhz(240); startWiFiIfNeeded(); sampleInterval=200;  digitalWrite(LED_PIN,1); break;
+    case 5: setCpuFrequencyMhz(80);  stopWiFiIfOn();      sampleInterval=1500; digitalWrite(LED_PIN,0); break;
+    case 6: setCpuFrequencyMhz(160); startWiFiIfNeeded(); enterOTAModeOnce(); sampleInterval=1000; digitalWrite(LED_PIN,1); break;
+  }
+  Serial.print("→ Mode Applied: "); Serial.println(mode);
+}
+
+void saveMode(uint8_t m) {
+  prefs.putUChar("last_mode", m);
+}
+
+uint8_t nextMode(uint8_t m) { return (m + 1) % NUM_MODES; }
+uint8_t prevMode(uint8_t m) { return (m == 0 ? NUM_MODES - 1 : m - 1); }
+
+// =====================================================
+//            Dummy Sensor Generator
+// =====================================================
+void readAndPrintDummySensors(bool t,bool h,bool a) {
+  if(t){ Serial.printf("TEMP: %.2f ", random(250,320)/10.0); }
+  if(h){ Serial.printf("HUM: %.2f ", random(400,700)/10.0); }
+  if(a){
+    Serial.printf("ACC: %.2f, %.2f, %.2f ",
+      random(-100,100)/10.0,
+      random(-100,100)/10.0,
+      random(-100,100)/10.0
+    );
+  }
+  Serial.println();
+}
+
+// =====================================================
+//       WiFi & OTA Helpers
+// =====================================================
+void startWiFiIfNeeded() {
+  if (WiFi.status() == WL_CONNECTED) return;
+
+  WiFi.mode(WIFI_STA);
+  WiFi.begin("OPPO Reno11 5G","skull2005");
+
+  unsigned long t = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - t < 7000) {
+    delay(200);
+    Serial.print(".");
+  }
+  Serial.println();
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("WiFi Connected");
+    ArduinoOTA.begin();
+  }
+}
+
+void stopWiFiIfOn() {
+  WiFi.disconnect(true);
+  WiFi.mode(WIFI_OFF);
+}
+
+void enterOTAModeOnce() {
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("OTA Ready.");
+  }
+}
