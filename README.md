@@ -96,7 +96,6 @@ This repo includes full literature-style documentation:
 * **Scope of Work**
 * **Conclusion**
 
----
 
 ## **🧪 Experiments Performed**
 
@@ -120,7 +119,6 @@ This repo includes full literature-style documentation:
 }
 ```
 
----
 
 ## **🛠️ Dummy Sensor Simulation**
 
@@ -160,7 +158,6 @@ Provides:
 
 Configure your WiFi and API keys in `config.h`.
 
----
 
 ## **📘 Applications**
 
@@ -170,7 +167,6 @@ Configure your WiFi and API keys in `config.h`.
 * Power supply noise analysis
 * Cloud ML telemetry
 
----
 
 ## **🧠 Future Improvements**
 
@@ -180,13 +176,11 @@ Configure your WiFi and API keys in `config.h`.
 * ESP32 brownout ML prediction
 * PCB v2 with differential ADC path
 
----
 
 ## **📜 License**
 
 MIT License — free to use and modify.
 
----
 
 ## **🧑‍💻 Author**
 
