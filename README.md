@@ -8,7 +8,7 @@ This board focuses on ensuring **stable ADC readings**, **clean power delivery**
 
 The entire system simulates sensor readings, offers 7 operating modes, monitors ESP32 voltage behavior, evaluates decoupling performance, and streams data to a cloud ML model and dashboard.
 
----
+
 
 ## **📂 Repository Structure**
 
@@ -44,7 +44,6 @@ ESP32-Expansion-Board/
 └── README.md
 ```
 
----
 
 ## **🎯 Key Features**
 
@@ -67,7 +66,6 @@ ESP32-Expansion-Board/
 | 5       | Safe Mode        | Minimal operations, safety      |
 | 6       | Calibration Mode | ADC stability tests             |
 
----
 
 ## **📡 Cloud Integration**
 
@@ -75,7 +73,6 @@ ESP32-Expansion-Board/
 * ML model predicts ESP32 stability
 * Dashboard visualizes voltage, resets, and noise patterns
 
----
 
 ## **⚙️ Hardware Components**
 
@@ -87,7 +84,6 @@ ESP32-Expansion-Board/
 * Test points for ADC noise analysis
 * Female headers for daughterboard mounting
 
----
 
 ## **📄 Project Documentation**
 
@@ -110,7 +106,6 @@ This repo includes full literature-style documentation:
 * Mode-wise power consumption test
 * Telemetry reliability test
 
----
 
 ## **📊 Example Telemetry Packet**
 
@@ -138,7 +133,6 @@ The firmware generates:
 
 Useful for cloud model testing.
 
----
 
 ## **🔧 How to Use**
 
