@@ -23,3 +23,4 @@
 * **Standoffs + Screws**
 * **Jumper Wires**
 
+![WhatsApp Image 2025-11-30 at 13 44 22_71ee2b73](https://github.com/user-attachments/assets/09cd50ad-3bdd-479b-98dc-461ec30ed7ee)
