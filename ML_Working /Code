@@ -1,1 +1,50 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+import joblib
+from sklearn.metrics import accuracy_score
 
+# Loading dataset
+data = pd.read_csv('/content/drive/MyDrive/ML Datasets/data_ML_Model.csv')
+
+print(data.head())
+print(data.isnull().sum())
+le = LabelEncoder()
+data['Status'] = le.fit_transform(data['Status'])
+print(le.classes_)   # ['Normal', 'Out of Range', 'Warning']
+X = data[['Temperature', 'Current']]
+y = data['Status']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+model = DecisionTreeClassifier(criterion='entropy', max_depth=4, random_state=42)
+model.fit(X_train, y_train)accuracy = accuracy_score(y_test, y_pred)
+print("Model Accuracy:", round(accuracy * 100, 2), "%")y_pred = model.predict(X_test)
+
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print(confusion_matrix(y_test, y_pred))
+print(classification_report(y_test, y_pred))
+# Manual Prediction using Trained ML Model
+# Step 1: Load your trained model and label encoder
+
+model = joblib.load('device_monitor_model.pkl')
+label_encoder = joblib.load('label_encoder.pkl')
+
+print(" Model and Label Encoder Loaded Successfully!\n")
+
+# Step 2: Take manual input
+temperature = float(input("Enter Temperature (°C): "))
+current = float(input("Enter Current (A): "))
+
+# Step 3: Prepare data for prediction
+input_data = pd.DataFrame([[temperature, current]], columns=['Temperature', 'Current'])
+
+# Step 4: Predict and show result
+prediction = model.predict(input_data)
+status = label_encoder.inverse_transform(prediction)[0]
+
+print("\n📊 Prediction Result:")
+print(f"Temperature: {temperature} °C")
+print(f"Current: {current} A")
+print(f"Predicted Status: {status}")
