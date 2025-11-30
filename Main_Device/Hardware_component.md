@@ -1,4 +1,4 @@
-# **📦 Hardware Components List (Final)**
+# **📦 Hardware Components List :**
 
 * **ESP32-WROOM-32 Module**
 * **AMS1117-3.3V Regulator** (if not using DevKit onboard regulator)
@@ -24,3 +24,6 @@
 * **Jumper Wires**
 
 ![WhatsApp Image 2025-11-30 at 13 44 22_71ee2b73](https://github.com/user-attachments/assets/09cd50ad-3bdd-479b-98dc-461ec30ed7ee)
+## ESP32 Expansion Board (Front View)
+
+<img src="images/board_front.jpg" width="350" alt="ESP32 Expansion Board">
