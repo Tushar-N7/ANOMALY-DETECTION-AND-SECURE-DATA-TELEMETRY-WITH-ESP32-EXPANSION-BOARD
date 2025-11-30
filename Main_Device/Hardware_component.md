@@ -24,11 +24,9 @@
 * **Jumper Wires**
 
 <img src="https://github.com/user-attachments/assets/09cd50ad-3bdd-479b-98dc-461ec30ed7ee" width="350" alt="ESP32 Expansion Board" />
-## ESP32 Expansion Board (Front View)
 
 ---
 
 <img src="https://github.com/user-attachments/assets/3fce7922-a0d9-425e-afaf-1ff0b69d3f11" width="350" alt="ESP32 Expansion Board - Photo 2" />
-## ESP32 Expansion Board (Back View)
 
 
