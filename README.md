@@ -180,9 +180,3 @@ Configure your WiFi and API keys in `config.h`.
 ## **📜 License**
 
 MIT License — free to use and modify.
-
-
-## **🧑‍💻 Author**
-
-Tushar N — Embedded systems & IoT developer.
-Just tell me **“generate full repo content”**.
